@@ -15,11 +15,13 @@ A simple React-based task manager to help you organize and track your daily task
 
 ## Demo
 
-![Demo](src/assets/demo.png)
+![Demo](src/assets/demo1.png)
+
+![Demo](src/assets/demo2.png)
 
 ## Installation
 
-1. Clone the repository: `git clone https://github.com/your-username/task-manager.git`
+1. Clone the repository: `git clone https://github.com/your-username/taskManager.git`
 2. Install dependencies: `npm install` or `npm i`
 3. Start the server: `npm run dev` or `npm start`
 4. Open `http://localhost:5173`
