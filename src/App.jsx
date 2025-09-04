@@ -1,9 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, createContext, useContext } from "react";
 import "./App.css";
 
-const TaskComponent = ({ taskManager, setTaskManager, deleteTask }) => {
+const TaskContext = createContext();
+
+const TaskComponent = () => {
   const [inputVal, setInputVal] = useState("");
   const [editingTaskId, setEditingTaskId] = useState(0);
+  const { taskManager, setTaskManager, deleteTask } = useContext(TaskContext);
 
   const handleEdit = (task) => {
     setEditingTaskId(task.id);
@@ -99,8 +102,10 @@ const TaskComponent = ({ taskManager, setTaskManager, deleteTask }) => {
   );
 };
 
-function AddTask({ hideAddBtn, setHideAddBtn, taskManager, setTaskManager }) {
+function AddTask() {
   const [inputVal, setInputVal] = useState("");
+  const { hideAddBtn, setHideAddBtn, taskManager, setTaskManager } =
+    useContext(TaskContext);
 
   const handleSubmit = () => {
     if (!inputVal.trim()) return;
@@ -122,7 +127,7 @@ function AddTask({ hideAddBtn, setHideAddBtn, taskManager, setTaskManager }) {
     setHideAddBtn(false);
   };
 
-  const handleKeyPress = (e) => {
+  const handleKeyDown = (e) => {
     if (e.key === "Enter") {
       handleSubmit();
     }
@@ -136,7 +141,7 @@ function AddTask({ hideAddBtn, setHideAddBtn, taskManager, setTaskManager }) {
             type="text"
             value={inputVal}
             onChange={(e) => setInputVal(e.target.value)}
-            onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyDown}
             placeholder="Enter category..."
             className="add-task-input"
             autoFocus
@@ -158,7 +163,9 @@ function AddTask({ hideAddBtn, setHideAddBtn, taskManager, setTaskManager }) {
   );
 }
 
-function FilteredTasks({ taskManager }) {
+function FilteredTasks() {
+  const { taskManager } = useContext(TaskContext);
+
   const activeTasks = taskManager.filter((t) => !t.completed);
   const completedTasks = taskManager.filter((t) => t.completed);
 
@@ -219,53 +226,54 @@ function App() {
   };
 
   return (
-    <div className="app">
-      <h1 className="main-title">Task Manager</h1>
+    <TaskContext.Provider
+      value={{
+        taskManager,
+        setTaskManager,
+        hideAddBtn,
+        setHideAddBtn,
+        deleteTask,
+      }}
+    >
+      <div className="app">
+        <h1 className="main-title">Task Manager</h1>
 
-      <div className="task-list-container">
-        <h2 className="section-title">All Tasks ({taskManager.length})</h2>
-        <TaskComponent
-          taskManager={taskManager}
-          setTaskManager={setTaskManager}
-          deleteTask={deleteTask}
-        />
+        <div className="task-list-container">
+          <h2 className="section-title">All Tasks ({taskManager.length})</h2>
+          <TaskComponent />
 
-        <div className="center-content">
-          {!hideAddBtn && (
-            <>
-              <button
-                className="btn btn-primary"
-                onClick={() => setHideAddBtn(true)}
-              >
-                + Add New Task
-              </button>
-              {taskManager.length ? (
+          <div className="center-content">
+            {!hideAddBtn && (
+              <>
                 <button
-                  onClick={() => {
-                    localStorage.removeItem("Tasks");
-                    setTaskManager([]);
-                  }}
-                  class="btn btn-secondary"
+                  className="btn btn-primary"
+                  onClick={() => setHideAddBtn(true)}
                 >
-                  Clear
+                  + Add New Task
                 </button>
-              ) : (
-                ""
-              )}
-            </>
-          )}
+                {taskManager.length ? (
+                  <button
+                    onClick={() => {
+                      localStorage.removeItem("Tasks");
+                      setTaskManager([]);
+                    }}
+                    className="btn btn-secondary"
+                  >
+                    Clear
+                  </button>
+                ) : (
+                  ""
+                )}
+              </>
+            )}
+          </div>
+
+          <AddTask />
         </div>
 
-        <AddTask
-          hideAddBtn={hideAddBtn}
-          setHideAddBtn={setHideAddBtn}
-          taskManager={taskManager}
-          setTaskManager={setTaskManager}
-        />
+        <FilteredTasks />
       </div>
-
-      <FilteredTasks taskManager={taskManager} />
-    </div>
+    </TaskContext.Provider>
   );
 }
 
